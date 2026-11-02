@@ -1288,6 +1288,7 @@ class _AsyncRolloutLoop:
             else [{}] * len(group.completions)
         )
 
+        per_func_std = [float(np.nanstd(r)) if not np.isnan(r).all() else float("nan") for r in per_func_rewards]
         # Option 3 advantage: one advantage per conversation, stamped on every training row it produced.
         # Under TRL's global token-mean loss a fork is invisible to the loss (see slime_research.md B.5),
         # so we do not split the reward or the advantage across a conversation's rows.
@@ -1307,9 +1308,10 @@ class _AsyncRolloutLoop:
                 "reward_kept": float(reward),
                 "reward_std": reward_std,
                 **{
-                    f"rewards/{name}": float(func_reward)
+                    f"rewards/{name}/mean": float(func_reward)
                     for name, func_reward in zip(self.reward_func_names, per_func_rewards[:, i], strict=True)
                 },
+                **{f"rewards/{name}/std": std for name, std in zip(self.reward_func_names, per_func_std, strict=True)},
                 **tm,
             }
             for seq in sequences:
