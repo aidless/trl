@@ -1306,12 +1306,15 @@ class _AsyncRolloutLoop:
         ):
             metrics = {
                 "reward_kept": float(reward),
-                "reward_std": reward_std,
+                "reward_group_std": reward_std,
                 **{
                     f"rewards/{name}/mean": float(func_reward)
                     for name, func_reward in zip(self.reward_func_names, per_func_rewards[:, i], strict=True)
                 },
-                **{f"rewards/{name}/std": std for name, std in zip(self.reward_func_names, per_func_std, strict=True)},
+                **{
+                    f"rewards/{name}/group_std": std
+                    for name, std in zip(self.reward_func_names, per_func_std, strict=True)
+                },
                 **tm,
             }
             for seq in sequences:
